@@ -3,24 +3,6 @@ const router = express.Router();
 const { processReel } = require('./videoProcessor');
 const { sendMessage } = require('./instagramSend');
 
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
-const RATE_LIMIT_MAX = 5;
-const MAX_CONCURRENT = 3;
-
-// Map of senderId -> array of timestamps for recent requests
-const userRequestLog = new Map();
-let activeRequests = 0;
-
-function isRateLimited(senderId) {
-  const now = Date.now();
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const timestamps = (userRequestLog.get(senderId) || []).filter((t) => t > windowStart);
-  if (timestamps.length >= RATE_LIMIT_MAX) return true;
-  timestamps.push(now);
-  userRequestLog.set(senderId, timestamps);
-  return false;
-}
-
 // Meta calls this once with a GET request when you set up the webhook,
 // to confirm you control this endpoint.
 router.get('/', (req, res) => {
@@ -41,6 +23,10 @@ router.post('/', async (req, res) => {
   // Respond immediately so Meta doesn't retry/timeout. Actual work happens after.
   res.status(200).send('EVENT_RECEIVED');
 
+  // TEMP DEBUG: log the raw payload so we can see exactly what Meta sends.
+  // Remove this once things are working - it'll print message content to your logs.
+  console.log('Incoming webhook payload:', JSON.stringify(req.body, null, 2));
+
   try {
     const entry = req.body.entry?.[0];
     const messagingEvent = entry?.messaging?.[0];
@@ -58,28 +44,11 @@ router.post('/', async (req, res) => {
         return;
       }
 
-      if (isRateLimited(senderId)) {
-        console.log(`Rate limited: ${senderId}`);
-        await sendMessage(senderId, "You've sent a lot of reels recently — try again in an hour.");
-        return;
-      }
-
-      if (activeRequests >= MAX_CONCURRENT) {
-        console.log(`Concurrency limit reached, dropping request from ${senderId}`);
-        await sendMessage(senderId, "I'm swamped right now, try again in a minute.");
-        return;
-      }
-
       console.log(`Received reel from ${senderId}`);
       await sendMessage(senderId, "Got it, give me a moment to watch this.");
 
-      activeRequests++;
-      try {
-        const explanation = await processReel(videoUrl);
-        await sendMessage(senderId, explanation);
-      } finally {
-        activeRequests--;
-      }
+      const explanation = await processReel(videoUrl);
+      await sendMessage(senderId, explanation);
     } else if (messagingEvent.message?.text) {
       await sendMessage(senderId, "Send me a reel and I'll explain what's going on in it.");
     }
