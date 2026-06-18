@@ -20,12 +20,9 @@ router.get('/', (req, res) => {
 
 // Real events land here as POST requests
 router.post('/', async (req, res) => {
+  console.log('Webhook POST received:', JSON.stringify(req.body));
   // Respond immediately so Meta doesn't retry/timeout. Actual work happens after.
   res.status(200).send('EVENT_RECEIVED');
-
-  // TEMP DEBUG: log the raw payload so we can see exactly what Meta sends.
-  // Remove this once things are working - it'll print message content to your logs.
-  console.log('Incoming webhook payload:', JSON.stringify(req.body, null, 2));
 
   try {
     const entry = req.body.entry?.[0];
