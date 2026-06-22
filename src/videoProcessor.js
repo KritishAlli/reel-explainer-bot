@@ -11,7 +11,16 @@ const { explainFrames } = require('./claudeClient');
 ffmpeg.setFfmpegPath(ffmpegPath);
 ffmpeg.setFfprobePath(ffprobePath);
 
-const YT_DLP_PATH = process.env.YT_DLP_PATH || path.join(__dirname, '..', 'yt-dlp');
+const YT_DLP_PATH = process.env.YT_DLP_PATH || path.join(os.tmpdir(), 'yt-dlp');
+
+async function ensureYtDlp() {
+  if (fs.existsSync(YT_DLP_PATH)) return;
+  const response = await axios.get(
+    'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp',
+    { responseType: 'arraybuffer', maxRedirects: 10 }
+  );
+  fs.writeFileSync(YT_DLP_PATH, Buffer.from(response.data), { mode: 0o755 });
+}
 
 async function downloadVideo(url) {
   const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
@@ -20,7 +29,8 @@ async function downloadVideo(url) {
   return tempPath;
 }
 
-function downloadVideoYtDlp(url) {
+async function downloadVideoYtDlp(url) {
+  await ensureYtDlp();
   return new Promise((resolve, reject) => {
     const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
     const proc = spawn(YT_DLP_PATH, [
