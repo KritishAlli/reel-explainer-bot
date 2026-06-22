@@ -9,7 +9,7 @@ async function explainFrames(base64Frames) {
   }));
 
   const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: 'claude-haiku-4-5',
     max_tokens: 500,
     messages: [
       {
