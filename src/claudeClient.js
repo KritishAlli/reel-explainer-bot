@@ -19,7 +19,7 @@ async function explainFrames(base64Frames) {
           {
             type: 'text',
             text:
-              "These are sequential frames from an Instagram reel, in order. Explain what's happening in it: the joke, reference, meme format, or context it assumes the viewer already has. Write for someone outside that specific niche who needs the background filled in. Be concise (under 150 words) and skip filler like 'this reel shows'.",
+              "These are sequential frames from an Instagram reel, in order. Explain this reel using this 3 sentence format. Sentence 1: Briefly explain the topic of this reel (ex: This reel is about a common github command called git push.). Sentence 2: Fill in the context required to understand this reel that someone unfamiliar with the topic would need to know. Sentence 3: Explain how the context ties in to the content of the reel. Keep your response to this format, with no filler words or titles, just a block of text that explains the reel."
           },
         ],
       },
@@ -31,3 +31,5 @@ async function explainFrames(base64Frames) {
 }
 
 module.exports = { explainFrames };
+
+
