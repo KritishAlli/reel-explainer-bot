@@ -4,10 +4,12 @@ const path = require('path');
 const { spawn } = require('child_process');
 const axios = require('axios');
 const ffmpegPath = require('ffmpeg-static');
+const ffprobePath = require('ffprobe-static').path;
 const ffmpeg = require('fluent-ffmpeg');
 const { explainFrames } = require('./claudeClient');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
+ffmpeg.setFfprobePath(ffprobePath);
 
 const YT_DLP_PATH = process.env.YT_DLP_PATH || path.join(__dirname, '..', 'yt-dlp');
 
