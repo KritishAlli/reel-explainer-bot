@@ -1,6 +1,7 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { spawn } = require('child_process');
 const axios = require('axios');
 const ffmpegPath = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
@@ -18,7 +19,7 @@ async function downloadVideo(url) {
 function downloadVideoYtDlp(url) {
   return new Promise((resolve, reject) => {
     const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
-    const proc = spawn('/usr/local/bin/yt-dlp', [
+    const proc = spawn('yt-dlp', [
       '-o', tempPath,
       '--merge-output-format', 'mp4',
       '--no-playlist',
@@ -58,8 +59,8 @@ function frameToBase64(framePath) {
   return fs.readFileSync(framePath).toString('base64');
 }
 
-async function processReel(videoUrl) {
-  const videoPath = await downloadVideo(videoUrl);
+async function processReelWithDownloader(downloadFn, url) {
+  const videoPath = await downloadFn(url);
 
   let result;
   try {
@@ -68,15 +69,23 @@ async function processReel(videoUrl) {
 
     result = await explainFrames(base64Frames);
 
-    // cleanup frames
     files.forEach((f) => fs.unlinkSync(f));
     fs.rmdirSync(outDir);
   } finally {
-    // cleanup video regardless of success/failure
     if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
   }
 
   return result;
 }
 
-module.exports = { processReel };
+// Used by the webhook route — Meta provides a direct CDN video URL
+async function processReel(videoUrl) {
+  return processReelWithDownloader(downloadVideo, videoUrl);
+}
+
+// Used by the /explain route — accepts a public Instagram reel URL
+async function processReelFromPublicUrl(url) {
+  return processReelWithDownloader(downloadVideoYtDlp, url);
+}
+
+module.exports = { processReel, processReelFromPublicUrl };
