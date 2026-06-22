@@ -18,8 +18,9 @@ router.post('/', requireApiKey, async (req, res) => {
     res.json({ explanation });
   } catch (err) {
     console.error('Error processing reel:', err);
-    res.status(500).json({ error: 'Failed to process reel' });
+    res.status(500).json({ error: 'Failed to process reel', detail: err.message });
   }
 });
 
 module.exports = router;
+
