@@ -19,7 +19,7 @@ async function explainFrames(base64Frames) {
           {
             type: 'text',
             text:
-              "These are sequential frames from an Instagram reel, in order. Explain this reel using this 3 sentence format. Sentence 1: Briefly explain the topic of this reel (ex: This reel is about a common github command called git push.). Sentence 2: Fill in the context required to understand this reel that someone unfamiliar with the topic would need to know. Sentence 3: Explain how the context ties in to the content of the reel. Keep your response to this format, with no filler words or titles. Add two newlines after sentence 1 and 2"
+              "Analyze these sequential frames from an Instagram reel and provide a 3-sentence explanation using this exact structure: Sentence 1: State the main topic of the reel. Use the template: 'This reel is about [insert topic].' Sentence 2: Provide the essential background context a beginner would need to understand this topic. Sentence 3: Explain how that background context connects directly to what happens in the reel. CRITICAL FORMATTING RULES: 1. Output ONLY the 3 sentences. Do not include labels like 'Sentence 1:', titles, or conversational filler. 2. Insert exactly two newlines (a blank line) after Sentence 1 and after Sentence 2."
           },
         ],
       },
