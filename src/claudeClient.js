@@ -8,7 +8,9 @@ const EXPLANATION_PROMPT =
   "Analyze these sequential frames from an Instagram reel and provide a 3-sentence explanation using this exact structure: Sentence 1: State the main topic of the reel. Use the template: 'This reel is about [insert topic].' Sentence 2: Provide the essential background context a beginner would need to understand this topic. Sentence 3: Explain how that background context connects directly to what happens in the reel. CRITICAL FORMATTING RULES: 1. Output ONLY the 3 sentences. Do not include labels like 'Sentence 1:', titles, or conversational filler. 2. Insert exactly two newlines (a blank line) after Sentence 1 and after Sentence 2.";
 
 async function explainFrames(base64Frames) {
-  return explainFramesGemini(base64Frames);
+  return process.env.AI_PROVIDER === 'gemini'
+    ? explainFramesGemini(base64Frames)
+    : explainFramesClaude(base64Frames);
 }
 
 async function explainFramesGemini(base64Frames) {
@@ -38,7 +40,7 @@ async function explainFramesClaude(base64Frames) {
   }));
 
   const message = await anthropic.messages.create({
-    model: 'claude-haiku-4-5',
+    model: 'claude-sonnet-4-6',
     max_tokens: 500,
     messages: [
       {
