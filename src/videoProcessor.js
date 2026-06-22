@@ -9,7 +9,7 @@ const { explainFrames } = require('./claudeClient');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-const YT_DLP_PATH = path.join(__dirname, '..', 'yt-dlp');
+const YT_DLP_PATH = process.env.YT_DLP_PATH || path.join(__dirname, '..', 'yt-dlp');
 
 async function downloadVideo(url) {
   const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
