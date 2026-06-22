@@ -1,8 +1,8 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const { spawn } = require('child_process');
 const axios = require('axios');
-const youtubeDl = require('youtube-dl-exec');
 const ffmpegPath = require('ffmpeg-static');
 const ffprobePath = require('ffprobe-static').path;
 const ffmpeg = require('fluent-ffmpeg');
@@ -18,14 +18,21 @@ async function downloadVideo(url) {
   return tempPath;
 }
 
-async function downloadVideoYtDlp(url) {
-  const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
-  await youtubeDl(url, {
-    output: tempPath,
-    mergeOutputFormat: 'mp4',
-    noPlaylist: true,
+function downloadVideoYtDlp(url) {
+  return new Promise((resolve, reject) => {
+    const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
+    const proc = spawn('/usr/local/bin/yt-dlp', [
+      '-o', tempPath,
+      '--merge-output-format', 'mp4',
+      '--no-playlist',
+      url,
+    ]);
+    proc.on('close', (code) => {
+      if (code === 0) resolve(tempPath);
+      else reject(new Error(`yt-dlp exited with code ${code}`));
+    });
+    proc.on('error', reject);
   });
-  return tempPath;
 }
 
 function extractFrames(videoPath, count = 6) {
