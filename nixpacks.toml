@@ -1,3 +1,6 @@
 [phases.setup]
-nixPkgs = ["ffmpeg", "yt-dlp"]
+nixPkgs = ["ffmpeg", "curl"]
+
+[phases.build]
+cmds = ["curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ./yt-dlp && chmod +x ./yt-dlp"]
 

@@ -9,6 +9,8 @@ const { explainFrames } = require('./claudeClient');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+const YT_DLP_PATH = path.join(__dirname, '..', 'yt-dlp');
+
 async function downloadVideo(url) {
   const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
   const response = await axios.get(url, { responseType: 'arraybuffer' });
@@ -19,7 +21,7 @@ async function downloadVideo(url) {
 function downloadVideoYtDlp(url) {
   return new Promise((resolve, reject) => {
     const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
-    const proc = spawn('yt-dlp', [
+    const proc = spawn(YT_DLP_PATH, [
       '-o', tempPath,
       '--merge-output-format', 'mp4',
       '--no-playlist',
