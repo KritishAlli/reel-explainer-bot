@@ -3,24 +3,10 @@ const os = require('os');
 const path = require('path');
 const { spawn } = require('child_process');
 const axios = require('axios');
-const ffmpegPath = require('ffmpeg-static');
-const ffprobePath = require('ffprobe-static').path;
 const ffmpeg = require('fluent-ffmpeg');
 const { explainFrames } = require('./claudeClient');
 
-ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
-
-const YT_DLP_PATH = process.env.YT_DLP_PATH || path.join(os.tmpdir(), 'yt-dlp');
-
-async function ensureYtDlp() {
-  if (fs.existsSync(YT_DLP_PATH)) return;
-  const response = await axios.get(
-    'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp',
-    { responseType: 'arraybuffer', maxRedirects: 10 }
-  );
-  fs.writeFileSync(YT_DLP_PATH, Buffer.from(response.data), { mode: 0o755 });
-}
+const YT_DLP_PATH = process.env.YT_DLP_PATH || 'yt-dlp';
 
 async function downloadVideo(url) {
   const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
@@ -29,8 +15,7 @@ async function downloadVideo(url) {
   return tempPath;
 }
 
-async function downloadVideoYtDlp(url) {
-  await ensureYtDlp();
+function downloadVideoYtDlp(url) {
   return new Promise((resolve, reject) => {
     const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
     const proc = spawn(YT_DLP_PATH, [
