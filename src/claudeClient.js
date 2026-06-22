@@ -2,7 +2,6 @@ const Anthropic = require('@anthropic-ai/sdk');
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// Uses Claude to analyze frames of video and explain the content of the reel
 async function explainFrames(base64Frames) {
   const imageBlocks = base64Frames.map((data) => ({
     type: 'image',

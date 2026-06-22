@@ -1,15 +1,12 @@
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { spawn } = require('child_process');
 const axios = require('axios');
 const ffmpegPath = require('ffmpeg-static');
-const ffprobePath = require('ffprobe-static').path;
 const ffmpeg = require('fluent-ffmpeg');
 const { explainFrames } = require('./claudeClient');
 
 ffmpeg.setFfmpegPath(ffmpegPath);
-ffmpeg.setFfprobePath(ffprobePath);
 
 async function downloadVideo(url) {
   const tempPath = path.join(os.tmpdir(), `reel-${Date.now()}.mp4`);
@@ -68,31 +65,18 @@ async function processReel(videoUrl) {
   try {
     const { files, outDir } = await extractFrames(videoPath, 6);
     const base64Frames = files.map(frameToBase64);
+
     result = await explainFrames(base64Frames);
+
+    // cleanup frames
     files.forEach((f) => fs.unlinkSync(f));
     fs.rmdirSync(outDir);
   } finally {
+    // cleanup video regardless of success/failure
     if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
   }
 
   return result;
 }
 
-async function processReelFromPublicUrl(url) {
-  const videoPath = await downloadVideoYtDlp(url);
-
-  let result;
-  try {
-    const { files, outDir } = await extractFrames(videoPath, 6);
-    const base64Frames = files.map(frameToBase64);
-    result = await explainFrames(base64Frames);
-    files.forEach((f) => fs.unlinkSync(f));
-    fs.rmdirSync(outDir);
-  } finally {
-    if (fs.existsSync(videoPath)) fs.unlinkSync(videoPath);
-  }
-
-  return result;
-}
-
-module.exports = { processReel, processReelFromPublicUrl };
+module.exports = { processReel };
